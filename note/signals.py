@@ -16,8 +16,9 @@ def notify_on_create_note(sender, instance, created, **kwargs):
             "type": "created",
             "id": instance.id,
             "data": {
-                "field1": instance.field1,
-                "field2": instance.field2,
+                "user": instance.user.id,
+                "text_content": instance.text_content,
+                "created_at": (instance.created_at).strftime('%Y-%m-%d %H:%M:%S'),
             },
         }
         redis_client.publish("note_updates", json.dumps(note))
