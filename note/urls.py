@@ -1,7 +1,7 @@
 from django.urls import path
 
-import .views
+from .views import sse_stream
 
 urlpatterns = [
- 
-    ]
+    path("events/", sse_stream, name="sse_stream"),
+]
