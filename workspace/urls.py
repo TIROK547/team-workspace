@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/push-subscription/', save_push_subscription, name='push_subscription'),
     path('manifest.json', pwa_manifest, name='pwa_manifest'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('notes/',include('note.urls')),
     path('', home_redirect, name='home'),
 ]
 
