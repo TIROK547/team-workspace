@@ -175,7 +175,7 @@
 </div>
 
 <script>
-    const projectId = {{ project.id }};
+    const projectId = "{{ project.id }}";
     
     // WebSocket برای چت
     const chatSocket = new WebSocket(
@@ -214,5 +214,100 @@
             messageInputDom.value = '';
         }
     };
+</script><div style="
+  width:850px; 
+  position: relative; /* اضافه کن */
+  top: -130px;        /* منفی = بالا */
+  left: 216px;        /* مثبت = راست */
+  margin:5px auto; 
+  padding:14px; 
+  background:#ffffff; 
+  border-radius:10px; 
+  box-shadow:0 4px 12px rgba(0,0,0,0.08); 
+  box-sizing:border-box; 
+  font-family:tahoma, sans-serif;
+">
+
+  <!-- عنوان -->
+  <h3 style="
+    margin:0 0 10px 0; 
+    font-size:23px; 
+    font-family:'Vazir','IranSans',sans-serif; 
+    font-weight:500; 
+    color:#222; 
+    border-bottom:1px solid #eee; 
+    padding-bottom:6px;
+  ">
+    نوت پروژه
+  </h3>
+
+  <!-- توضیح -->
+  <p style="
+    margin:0 0 8px 0; 
+    font-size:14px; 
+    font-family:'Vazir','IranSans',sans-serif; 
+    color:#666;
+  ">
+    یادداشت مربوط به پروژه را وارد کنید
+  </p>
+
+  <!-- textarea -->
+  <textarea id="noteInput" placeholder="اینجا بنویس..." style="
+    width:100%; 
+    height:70px; 
+    padding:8px; 
+    box-sizing:border-box; 
+    resize:none; 
+    border-radius:6px; 
+    border:1px solid #ddd; 
+    font-size:13px; 
+    outline:none; 
+    background:#fafafa;
+  "></textarea>
+
+  <!-- دکمه -->
+  <button id="sendNote" style="
+    width:100%; 
+    margin-top:16px; 
+    font-family:'Vazir','IranSans',sans-serif; 
+    padding:8px 0; 
+    background:linear-gradient(135deg,#e53935,#c62828); 
+    color:#fff; 
+    border:none; 
+    border-radius:6px; 
+    font-size:14px; 
+    cursor:pointer;
+  ">
+    ارسال نوت
+  </button>
+
+  <!-- نمایش نوت -->
+  <div id="displayNote" style="
+    margin-top:10px; 
+    background:#f5f5f5; 
+    padding:10px; 
+    border-radius:6px; 
+    font-family:'Vazir','IranSans',sans-serif; 
+    font-size:14px;
+  "></div>
+
+</div>
+
+<script>
+document.getElementById('sendNote').addEventListener('click', function() {
+  const noteText = document.getElementById('noteInput').value.trim();
+  if(noteText !== "") {
+    const now = new Date();
+    const date = now.toLocaleDateString(); 
+    const time = now.toLocaleTimeString(); 
+    document.getElementById('displayNote').innerHTML = `
+      <strong>${date} ${time}</strong><br>${noteText}
+    `;
+    document.getElementById('noteInput').value = "";
+  }
+});
 </script>
+</div>
+
+
 {% endblock %}
