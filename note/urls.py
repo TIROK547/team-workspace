@@ -1,8 +1,9 @@
 from django.urls import path
-
-from .views import sse_stream, create_note
+from . import views
 
 urlpatterns = [
-    path("events/", sse_stream, name="sse_stream"),
-    path("new/", create_note, name="create_new_note")
+    path('create/', views.create_note, name='create_note'),
+    path('', views.get_notes, name='get_notes'),
+    path('<int:note_id>/delete/', views.delete_note, name='delete_note'),
+    path('stream/', views.sse_stream, name='notes_sse_stream'),
 ]

@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
+    <!-- هدر پروژه -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <div class="flex justify-between items-start mb-4">
             <div>
@@ -9,14 +10,14 @@
                 <p class="text-gray-600">{{ project.description }}</p>
             </div>
             <div class="flex space-x-3 space-x-reverse">
-                <a href="{% url 'upload_project_attachment' project.id %}" 
+                <a href="{% url 'upload_project_attachment' project.id %}"
                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center">
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                     </svg>
                     آپلود فایل
                 </a>
-                <span class="px-3 py-1 rounded-full text-sm 
+                <span class="px-3 py-1 rounded-full text-sm
                     {% if project.status == 'active' %}bg-green-100 text-green-800
                     {% elif project.status == 'completed' %}bg-gray-100 text-gray-800
                     {% else %}bg-yellow-100 text-yellow-800{% endif %}">
@@ -31,45 +32,74 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- بخش تسک‌ها -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- فرم ایجاد تسک -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4">ایجاد تسک جدید</h2>
-                <form method="post" class="space-y-4">
-                    {% csrf_token %}
-                    <div>
-                        <input type="text" name="title" placeholder="عنوان تسک" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                    </div>
-                    <div>
-                        <textarea name="description" placeholder="توضیحات تسک" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        ایجاد تسک
-                    </button>
-                </form>
+    <!-- ردیف اول: ایجاد تسک + نوت پروژه -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- فرم ایجاد تسک -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">ایجاد تسک جدید</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <input type="text" name="title" placeholder="عنوان تسک"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
+                </div>
+                <div>
+                    <textarea name="description" placeholder="توضیحات تسک"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent" rows="3"></textarea>
+                </div>
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    ایجاد تسک
+                </button>
+            </form>
+        </div>
+
+        <!-- نوت پروژه -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">نوت پروژه</h2>
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span id="sseStatus" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                </div>
             </div>
 
-            <!-- لیست تسک‌ها -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4">تسک‌ها</h2>
+            <textarea id="noteInput"
+                      placeholder="یادداشت خود را بنویسید... (حداقل ۵ کاراکتر)"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      rows="3"></textarea>
+
+            <button id="sendNote"
+                    class="w-full mt-3 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed">
+                ارسال نوت
+            </button>
+
+            <div id="notesContainer" class="mt-3 max-h-32 overflow-y-auto space-y-2">
+                <p class="text-gray-400 text-center text-sm py-2">در حال بارگذاری...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ردیف دوم: لیست تسک‌ها + فایل‌ها -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- لیست تسک‌ها -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">تسک‌ها</h2>
+            <div class="max-h-96 overflow-y-auto">
                 {% for task in tasks %}
                 <div class="border-b border-gray-200 py-4 last:border-b-0">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
                             <h3 class="font-semibold">{{ task.title }}</h3>
                             <p class="text-gray-600 text-sm mt-1">{{ task.description }}</p>
-                            
-                            <!-- فایل‌های تسک -->
+
                             {% if task.attachments.exists %}
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500 mb-1">فایل‌های ضمیمه:</p>
                                 <div class="flex flex-wrap gap-2">
                                     {% for attachment in task.attachments.all %}
-                                    <a href="{% url 'download_attachment' attachment.id %}" 
+                                    <a href="{% url 'download_attachment' attachment.id %}"
                                        class="flex items-center space-x-2 space-x-reverse bg-gray-100 px-3 py-1 rounded-lg text-sm hover:bg-gray-200">
                                         <span>{{ attachment.get_file_icon }}</span>
                                         <span>{{ attachment.file_name }}</span>
@@ -80,9 +110,9 @@
                             </div>
                             {% endif %}
                         </div>
-                        
-                        <div class="flex flex-col items-end space-y-2">
-                            <span class="px-2 py-1 rounded text-xs 
+
+                        <div class="flex flex-col items-end space-y-2 mr-4">
+                            <span class="px-2 py-1 rounded text-xs
                                 {% if task.status == 'todo' %}bg-gray-100 text-gray-800
                                 {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-800
                                 {% elif task.status == 'review' %}bg-yellow-100 text-yellow-800
@@ -94,22 +124,21 @@
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-gray-500 text-center py-4">هنوز تسکی وجود ندارد.</p>
+                <p class="text-gray-500 text-center py-8">هنوز تسکی وجود ندارد.</p>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- سایدبار -->
-        <div class="space-y-6">
-            <!-- فایل‌های پروژه -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold">فایل‌های پروژه</h2>
-                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {{ project.attachments.count }} فایل
-                    </span>
-                </div>
-                
+        <!-- سایدبار: فایل‌ها -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">فایل‌های پروژه</h2>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    {{ project.attachments.count }} فایل
+                </span>
+            </div>
+
+            <div class="max-h-64 overflow-y-auto">
                 {% if project.attachments.exists %}
                 <div class="space-y-3">
                     {% for attachment in project.attachments.all %}
@@ -117,22 +146,24 @@
                         <div class="flex items-center space-x-3 space-x-reverse">
                             <span class="text-lg">{{ attachment.get_file_icon }}</span>
                             <div>
-                                <a href="{% url 'download_attachment' attachment.id %}" 
-                                   class="font-medium text-blue-600 hover:text-blue-800">
+                                <a href="{% url 'download_attachment' attachment.id %}"
+                                   class="font-medium text-blue-600 hover:text-blue-800 text-sm">
                                     {{ attachment.file_name }}
                                 </a>
                                 <p class="text-xs text-gray-500">
-                                    {{ attachment.get_file_size_display }} • {{ attachment.uploaded_by.username }}
+                                    {{ attachment.get_file_size_display }}
                                 </p>
                             </div>
                         </div>
                         {% if attachment.uploaded_by == user or user.is_staff %}
                         <form method="post" action="{% url 'delete_attachment' attachment.id %}" class="inline">
                             {% csrf_token %}
-                            <button type="submit" 
+                            <button type="submit"
                                     onclick="return confirm('آیا از حذف این فایل مطمئن هستید؟')"
-                                    class="text-red-600 hover:text-red-800 text-sm">
-                                حذف
+                                    class="text-red-500 hover:text-red-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
                             </button>
                         </form>
                         {% endif %}
@@ -142,32 +173,43 @@
                 {% else %}
                 <p class="text-gray-500 text-center py-4">هنوز فایلی آپلود نشده است.</p>
                 {% endif %}
-                
-                <div class="mt-4">
-                    <a href="{% url 'upload_project_attachment' project.id %}" 
-                       class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
-                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        افزودن فایل جدید
-                    </a>
-                </div>
             </div>
 
-            <!-- بخش چت -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-4">چت پروژه</h2>
-                <div id="chat-messages" class="h-64 overflow-y-auto mb-4 border border-gray-200 rounded p-4">
+            <a href="{% url 'upload_project_attachment' project.id %}"
+               class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                افزودن فایل
+            </a>
+        </div>
+    </div>
+
+    <!-- ردیف سوم: چت (تمام عرض) -->
+    <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold mb-4">چت پروژه</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2">
+                <div id="chat-messages" class="h-48 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
                     <!-- پیام‌های چت اینجا نمایش داده می‌شوند -->
                 </div>
-                <div class="flex">
-                    <input type="text" id="chat-message-input" 
-                           placeholder="پیام خود را بنویسید..." 
-                           class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md">
-                    <button id="chat-message-submit" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-l-md hover:bg-blue-700">
+                <div class="flex mt-3">
+                    <input type="text" id="chat-message-input"
+                           placeholder="پیام خود را بنویسید..."
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button id="chat-message-submit"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-l-lg hover:bg-blue-700 transition-colors">
                         ارسال
                     </button>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <h3 class="font-semibold text-gray-700 mb-3">اعضای آنلاین</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        <span class="text-sm text-gray-600">{{ user.username }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -176,37 +218,43 @@
 
 <script>
     const projectId = "{{ project.id }}";
-    
+    const csrfToken = "{{ csrf_token }}";
+    const currentUser = "{{ user.username }}";
+
+    // =====================
     // WebSocket برای چت
+    // =====================
     const chatSocket = new WebSocket(
         'ws://' + window.location.host + '/ws/chat/' + projectId + '/'
     );
-    
+
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const chatMessages = document.querySelector('#chat-messages');
-        
+
         const messageElement = document.createElement('div');
+        messageElement.className = 'mb-2 p-2 bg-white rounded';
         messageElement.innerHTML = `
-            <strong>${data.username}:</strong> ${data.message}
-            <span class="text-xs text-gray-500">${new Date(data.timestamp).toLocaleTimeString()}</span>
+            <span class="font-medium text-blue-600">${data.username}:</span>
+            <span class="text-gray-700">${data.message}</span>
+            <span class="text-xs text-gray-400 mr-2">${new Date(data.timestamp).toLocaleTimeString('fa-IR')}</span>
         `;
-        
+
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     };
-    
+
     document.querySelector('#chat-message-input').focus();
     document.querySelector('#chat-message-input').onkeyup = function(e) {
         if (e.keyCode === 13) {
             document.querySelector('#chat-message-submit').click();
         }
     };
-    
+
     document.querySelector('#chat-message-submit').onclick = function(e) {
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
-        
+
         if (message) {
             chatSocket.send(JSON.stringify({
                 'message': message
@@ -214,100 +262,201 @@
             messageInputDom.value = '';
         }
     };
-</script><div style="
-  width:850px; 
-  position: relative; /* اضافه کن */
-  top: -130px;        /* منفی = بالا */
-  left: 216px;        /* مثبت = راست */
-  margin:5px auto; 
-  padding:14px; 
-  background:#ffffff; 
-  border-radius:10px; 
-  box-shadow:0 4px 12px rgba(0,0,0,0.08); 
-  box-sizing:border-box; 
-  font-family:tahoma, sans-serif;
-">
 
-  <!-- عنوان -->
-  <h3 style="
-    margin:0 0 10px 0; 
-    font-size:23px; 
-    font-family:'Vazir','IranSans',sans-serif; 
-    font-weight:500; 
-    color:#222; 
-    border-bottom:1px solid #eee; 
-    padding-bottom:6px;
-  ">
-    نوت پروژه
-  </h3>
+    // نوت پروژه با SSE
+    const notesContainer = document.getElementById('notesContainer');
+    const noteInput = document.getElementById('noteInput');
+    const sendNoteBtn = document.getElementById('sendNote');
+    const sseStatus = document.getElementById('sseStatus');
 
-  <!-- توضیح -->
-  <p style="
-    margin:0 0 8px 0; 
-    font-size:14px; 
-    font-family:'Vazir','IranSans',sans-serif; 
-    color:#666;
-  ">
-    یادداشت مربوط به پروژه را وارد کنید
-  </p>
+    // Store notes locally for rendering
+    let notes = [];
 
-  <!-- textarea -->
-  <textarea id="noteInput" placeholder="اینجا بنویس..." style="
-    width:100%; 
-    height:70px; 
-    padding:8px; 
-    box-sizing:border-box; 
-    resize:none; 
-    border-radius:6px; 
-    border:1px solid #ddd; 
-    font-size:13px; 
-    outline:none; 
-    background:#fafafa;
-  "></textarea>
+    // Render notes
+    function renderNotes() {
+        if (notes.length === 0) {
+            notesContainer.innerHTML = '<p class="text-gray-400 text-center text-sm py-2">هنوز نوتی ثبت نشده</p>';
+            return;
+        }
 
-  <!-- دکمه -->
-  <button id="sendNote" style="
-    width:100%; 
-    margin-top:16px; 
-    font-family:'Vazir','IranSans',sans-serif; 
-    padding:8px 0; 
-    background:linear-gradient(135deg,#e53935,#c62828); 
-    color:#fff; 
-    border:none; 
-    border-radius:6px; 
-    font-size:14px; 
-    cursor:pointer;
-  ">
-    ارسال نوت
-  </button>
+        notesContainer.innerHTML = notes.map(note => `
+            <div class="bg-gray-50 p-2 rounded border border-gray-200 text-sm" data-note-id="${note.id}">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <span class="text-xs font-medium text-blue-600">${note.user}</span>
+                        <span class="text-xs text-gray-400">${note.date} - ${note.time}</span>
+                    </div>
+                        <button onclick="deleteNote(${note.id})" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                </div>
+                <p class="text-gray-600 mt-1">${escapeHtml(note.text)}</p>
+            </div>
+        `).join('');
+        
+        notesContainer.scrollTop = 0;
+    }
 
-  <!-- نمایش نوت -->
-  <div id="displayNote" style="
-    margin-top:10px; 
-    background:#f5f5f5; 
-    padding:10px; 
-    border-radius:6px; 
-    font-family:'Vazir','IranSans',sans-serif; 
-    font-size:14px;
-  "></div>
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
-</div>
+    // Load existing notes
+    async function loadNotes() {
+        try {
+            const response = await fetch(`/notes/?project_id=${projectId}`);
+            const data = await response.json();
+            notes = data.notes || [];
+            renderNotes();
+        } catch (error) {
+            console.error('Error loading notes:', error);
+            notesContainer.innerHTML = '<p class="text-red-400 text-center text-sm py-2">خطا در بارگذاری نوت‌ها</p>';
+        }
+    }
 
-<script>
-document.getElementById('sendNote').addEventListener('click', function() {
-  const noteText = document.getElementById('noteInput').value.trim();
-  if(noteText !== "") {
-    const now = new Date();
-    const date = now.toLocaleDateString(); 
-    const time = now.toLocaleTimeString(); 
-    document.getElementById('displayNote').innerHTML = `
-      <strong>${date} ${time}</strong><br>${noteText}
-    `;
-    document.getElementById('noteInput').value = "";
-  }
-});
+    async function sendNote() {
+        const text = noteInput.value.trim();
+
+        if (text.length < 5) {
+            alert('پیام باید حداقل ۵ کاراکتر باشد');
+            return;
+        }
+
+        sendNoteBtn.disabled = true;
+        sendNoteBtn.textContent = 'در حال ارسال...';
+
+        try {
+            const formData = new FormData();
+            formData.append('text_content', text);
+            formData.append('project_id', projectId);
+
+            // Add optimistic update - add the note immediately
+            const tempNoteId = 'temp_' + Date.now();
+            const tempNote = {
+                id: tempNoteId,
+                user: currentUser,
+                text: text,
+                date: new Date().toLocaleDateString('fa-IR'),
+                time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+                project_id: projectId,
+                is_temp: true  // Add flag to identify temp notes
+            };
+
+            notes.unshift(tempNote);
+            renderNotes();
+
+            const response = await fetch('/notes/create/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                noteInput.value = '';
+
+                // Store the real note ID to match with SSE
+                if (data.note && data.note.id) {
+                    // Wait for SSE to replace the temp note
+                    // The temp note will be removed when real note arrives via SSE
+                    console.log('Note created with ID:', data.note.id);
+                } else {
+                    // If no note ID in response, remove temp note after delay
+                    setTimeout(() => {
+                        notes = notes.filter(n => n.id !== tempNoteId);
+                        renderNotes();
+                    }, 3000);
+                }
+            } else {
+                // If creation failed, remove the optimistic update
+                notes = notes.filter(n => n.id !== tempNoteId);
+                renderNotes();
+                alert(data.message || 'خطا در ارسال نوت');
+            }
+        } catch (error) {
+            console.error('Error sending note:', error);
+            // Remove the optimistic update if there's an error
+            const tempNoteId = 'temp_' + Date.now();
+            notes = notes.filter(n => n.id !== tempNoteId);
+            renderNotes();
+            alert('خطا در ارسال نوت');
+        } finally {
+            sendNoteBtn.disabled = false;
+            sendNoteBtn.textContent = 'ارسال نوت';
+        }
+    }
+
+    // Delete note
+    async function deleteNote(noteId) {
+        try {
+            const response = await fetch(`/notes/${noteId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+
+            if (response.ok) {
+                notes = notes.filter(n => n.id !== noteId);
+                renderNotes();
+            } else {
+                const data = await response.json();
+                alert(data.message || 'خطا در حذف نوت');
+            }
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            alert('خطا در حذف نوت');
+        }
+    }
+
+    // SSE Connection
+    function connectSSE() {
+        const source = new EventSource(`/notes/stream/?project_id=${projectId}`);
+
+        source.addEventListener('connected', function(e) {
+            console.log('SSE connected');
+            sseStatus.classList.remove('bg-gray-400', 'bg-red-500');
+            sseStatus.classList.add('bg-green-500');
+        });
+
+        source.addEventListener('note', function(e) {
+            const noteData = JSON.parse(e.data);
+            
+            // Check if note already exists (avoid duplicates)
+            if (!notes.find(n => n.id === noteData.id)) {
+                notes.unshift(noteData);
+                renderNotes();
+            }
+        });
+
+        source.addEventListener('error', function(e) {
+            console.log('SSE error:', e);
+            sseStatus.classList.remove('bg-green-500', 'bg-gray-400');
+            sseStatus.classList.add('bg-red-500');
+            
+            // Reconnect after 5 seconds
+            source.close();
+            setTimeout(connectSSE, 5000);
+        });
+
+        return source;
+    }
+
+    // Event listeners
+    sendNoteBtn.addEventListener('click', sendNote);
+
+    noteInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            sendNote();
+        }
+    });
+
+    // Initialize
+    loadNotes();
+    connectSSE();
 </script>
-</div>
-
-
 {% endblock %}
